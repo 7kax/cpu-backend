@@ -16,8 +16,16 @@ json output;
 
 int main()
 {
-    freopen("./test_file/raw.yo", "r", stdin);
-    freopen("./output/ans.json", "w", stdout);
+    std::cout << "WARNING:Make sure you put files in correct catalog!" << std::endl;
+    std::string read_file_seed = "./test_file/";
+    std::string write_file_seed = "./output/";
+    std::string read_file, write_file;
+    std::cout << "Enter test file name:" << std::endl;
+    std::cin >> read_file;
+    std::cout << "Enter output file name:" << std::endl;
+    std::cin >> write_file;
+    freopen((read_file_seed + read_file).c_str(), "r", stdin);
+    freopen((write_file_seed + write_file).c_str(), "w", stdout);
     // init
     initializer();
     output.clear();
