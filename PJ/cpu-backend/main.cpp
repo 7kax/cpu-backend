@@ -49,7 +49,9 @@ int main()
     add_json();
     // print info
     std::cout << std::setw(4) << output << std::endl;
-
+    freopen("CON", "w", stdout);
+    freopen("CON", "r", stdin);
+    std::cout << "Work is done." << std::endl;
     return 0;
 }
 
