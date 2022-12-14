@@ -1,6 +1,6 @@
-#include "system_y86.h"
-#include "run.h"
-#include "json.hpp"
+#include "./headers/system_y86.h"
+#include "./headers/run.h"
+#include "./headers/json.hpp"
 using json = nlohmann::json;
 const json src = {
     {"PC", 0},
@@ -16,8 +16,8 @@ json output;
 
 int main()
 {
-    // freopen("../test/ret-hazard.yo", "r", stdin);
-    // freopen("out.json", "w", stdout);
+    freopen("./test_file/raw.yo", "r", stdin);
+    freopen("./output/ans.json", "w", stdout);
     // init
     initializer();
     output.clear();
