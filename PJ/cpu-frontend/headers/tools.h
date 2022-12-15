@@ -1,10 +1,7 @@
 #pragma once
-// #ifndef __TOOLS_H__
-// #define __TOOLS_H__
 #include <iostream>
 #include <vector>
 #include <cstdlib>
-// #endif
 typedef long long ll;
 
 short char_to_hex(char in);

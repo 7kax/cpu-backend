@@ -1,6 +1,4 @@
 #pragma once
-// #ifndef __SYSTEM_Y86_H__
-// #define __SYSTEM_Y86_H__
 #include <map>
 #include <string>
 #include <array>
@@ -31,7 +29,6 @@
 #define STAT_HLT 2
 #define STAT_ADR 3
 #define STAT_INS 4
-// #endif
 typedef long long ll;
 const std::string ins_loc = "0x";
 
@@ -40,7 +37,6 @@ std::array<ll, 16> RF;
 std::array<bool, 3> CC;
 int STAT;
 std::vector<short> instructions;
-std::map<ll, std::string> locate_ins;
 std::map<ll, ll> DMEM;
 bool Cnd;
 int MEM_start;
@@ -65,7 +61,6 @@ void initializer()
             instructions.resize(loc);
             for (int i = 7; isHex(temp[i]); i++)
                 instructions.push_back(char_to_hex(temp[i]));
-            locate_ins[loc / 2] = temp.substr(31, temp.size() - 31);
         }
     }
     MEM_start = instructions.size() + 1;

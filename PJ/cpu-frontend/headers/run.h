@@ -1,9 +1,6 @@
 #pragma once
-// #ifndef __RUN_H__
-// #define __RUN_H__
 #include "system_y86.h"
 #include "tools.h"
-// #endif
 typedef long long ll;
 
 short icode, ifun;
@@ -139,6 +136,11 @@ void memory()
     case 7:
         break;
     case 4:
+        if (valE >= MEM_start)
+            DMEM[valE] = valA;
+        else
+            long_to_ins(instructions, valA, valE * 2);
+        break;
     case 10:
         if (valE >= MEM_start)
             DMEM[valE] = valA;

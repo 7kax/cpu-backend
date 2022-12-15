@@ -1,26 +1,30 @@
-#include "system_y86.h"
-#include "run.h"
-#include "json.hpp"
-using json = nlohmann::json;
-const json src = {
-    {"PC", 0},
-    {"REG", {{"rax", 0}, {"rcx", 0}, {"rdx", 0}, {"rbx", 0}, {"rsp", 0}, {"rbp", 0}, {"rsi", 0}, {"rdi", 0}, {"r8", 0}, {"r9", 0}, {"r10", 0}, {"r11", 0}, {"r12", 0}, {"r13", 0}, {"r14", 0}}},
-    {"CC", {{"ZF", 0}, {"SF", 0}, {"OF", 0}}},
-    {"STAT", 1},
-    {"MEM", {}},
-    {"Count", 1},
-    {"instruction", {}}};
+#include "./headers/system_y86.h"
+#include "./headers/run.h"
+#include "./headers/json.hpp"
+#include "./headers/fifo_map.hpp"
+using namespace nlohmann;
+
+// A workaround to give to use fifo_map as map, we are just ignoring the 'less' compare
+template <class K, class V, class dummy_compare, class A>
+using my_workaround_fifo_map = fifo_map<K, V, fifo_map_compare<K>, A>;
+using my_json = basic_json<my_workaround_fifo_map>;
 
 void add_json();
 
-json dest;
-json output;
-int json_counter = 1;
+my_json output;
 
 int main()
 {
-    freopen("C:\\Users\\Tool Man\\Downloads\\raw.yo", "r", stdin);
-    freopen("C:\\Users\\Tool Man\\Downloads\\ans.json", "w", stdout);
+    std::cout << "WARNING:Make sure you put files in correct catalog!" << std::endl;
+    std::string read_file_seed = "./test_file/";
+    std::string write_file_seed = "./output/";
+    std::string read_file, write_file;
+    std::cout << "Enter test file name:" << std::endl;
+    std::cin >> read_file;
+    std::cout << "Enter output file name:" << std::endl;
+    std::cin >> write_file;
+    freopen((read_file_seed + read_file).c_str(), "r", stdin);
+    freopen((write_file_seed + write_file).c_str(), "w", stdout);
     // init
     initializer();
     output.clear();
@@ -44,14 +48,16 @@ int main()
     add_json();
     // print info
     std::cout << std::setw(4) << output << std::endl;
-
+    freopen("CON", "w", stdout);
+    freopen("CON", "r", stdin);
+    std::cout << "Work is done." << std::endl;
     return 0;
 }
 
 void add_json()
 {
     // init
-    dest = src;
+    my_json dest;
     // set PC
     dest["PC"] = PC;
     // set REG
@@ -87,10 +93,6 @@ void add_json()
     for (auto &cell : DMEM)
         if (cell.second != 0)
             dest["MEM"][std::to_string(cell.first)] = cell.second;
-    // set counter
-    dest["Count"] = json_counter++;
-    // add ins
-    dest["instruction"] = locate_ins[PC];
     // add to info
     output.push_back(dest);
 }

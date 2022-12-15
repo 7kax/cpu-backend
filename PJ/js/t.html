@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <title>Y86 simulation</title>
+</head>
+
+<style>
+    /* 背景图片 */
+    body {
+        margin: 0px;
+        background: url("https://images3.alphacoders.com/649/649328.png") no-repeat;
+        background-size: 100% 100%;
+        background-attachment: fixed;
+    }
+
+    .card {
+        position: absolute;
+        width: 35%;
+        background-color: black;
+        border: 15px solid darkgreen;
+        padding: 25px;
+        margin: 25px;
+        color: greenyellow;
+        margin-top: 5%;
+    }
+
+    #happy {
+        left: 5%;
+        min-height: 60%;
+    }
+
+    #unhappy {
+        left: 55%;
+        min-height: 60%;
+    }
+
+    .button {
+        border-radius: 32px;
+        background: black;
+        /* box-shadow: 35px 35px 70px #1e6830,
+            -35px -35px 70px #26863e; */
+        /* position: relative;
+        background-color: black;
+        border: none;*/
+        color: green;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        /* bottom: 10%; */
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    input[type=file] {
+        position: absolute;
+        padding: 12px 20px;
+        background-color: black;
+        opacity: 0;
+        margin-top: 0px;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .a-upload {
+        padding: 4px 10px;
+        height: 20px;
+        line-height: 20px;
+        position: relative;
+        cursor: pointer;
+        color: #888;
+        background: #fafafa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+        background-color: black;
+        display: inline-block;
+        *display: inline;
+        *zoom: 1
+    }
+
+    .a-upload input {
+        position: absolute;
+        font-size: 100px;
+        right: 0;
+        top: 0;
+        opacity: 0;
+        filter: alpha(opacity=0);
+        cursor: pointer;
+        background-color: black;
+    }
+
+    .a-upload:hover {
+        color: #444;
+        background: #eee;
+        border-color: #ccc;
+        text-decoration: none
+    }
+
+    .button:hover {
+        color: #444;
+        background: #eee;
+        border-color: #ccc;
+        text-decoration: none
+    }
+
+    .h1 {
+        text-align: center;
+        color: red;
+    }
+</style>
+
+<body>
+
+    <h1 class="h1">
+        Y86 simulation
+    </h1>
+    <div class="card" id="happy">指令输入</div>
+    <div class="card" id="unhappy">输出答案</div>
+    <a class="a-upload">
+        <input class="input" type="file" id="file">上传源文件
+    </a>
+    <a class="a-upload">
+        <input class="input" type="file" id="output">上传答案文件
+    </a>
+
+    <button class="button" onclick="Next()" id="next"> NEXT </button>
+    <button class="button" onclick="Back()" id="next"> BACK </button>
+</body>
+
+<script type="text/javascript">
+    var halt = 0;
+    //记录进行的循环
+    var cnt = 0;
+    //标记执行到的代码序号
+    var index;
+    //obj存储着json对象
+    var obj;
+    //ins存储指令
+    var ins = Array();
+    //Raw存储输入文件。rawc存储分割成行的字符串数组
+    var Raw, raw;
+
+    function sleep(d) {
+        for (var t = Date.now(); Date.now() - t <= d;);
+    }
+
+
+    function Back() {
+        cnt--;
+        if (cnt < 0) {
+            alert("已经返回到第一步!");
+            cnt = 0;
+            return;
+        }
+        display();
+    }
+
+    // 输入源文件，触发该函数
+    //读取输入的文件，并调用exe处理数据，输出数据到本地
+    $("#file").on("change", function () {
+        reader = new FileReader()
+        file = $(this).get(0).files[0]
+        reader.readAsText(file)
+        reader.onload = function () {
+            $("#happy").get(0).innerText = reader.result
+            Raw = reader.result;
+            raw = Raw.split("\n");
+            for (var i = 0; i < raw.length; i++)
+                ins[i] = raw[i].substr(0, 5);
+            const fileName = 'raw.yo';
+            // const str = 'Raw .';
+            // const content = str
+            const blob = new Blob([Raw], {
+                type: 'application/text'
+            }) // 构造一个blob对象来处理数据
+            // 对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+            // IE10以上支持blob但是依然不支持download
+            if ('download' in document.createElement('a')) { // 支持a标签download的浏览器
+                const link = document.createElement('a') // 创建a标签
+                link.download = fileName // a标签添加属性
+                link.style.display = 'none'
+                link.href = URL.createObjectURL(blob)
+                document.body.appendChild(link)
+                link.click() // 执行下载
+                URL.revokeObjectURL(link.href) // 释放url
+                document.body.removeChild(link) // 释放标签
+            } else { // 其他浏览器
+                navigator.msSaveBlob(blob, fileName)
+            }
+            sleep(1000);
+            window.location.href = "shishi://main";
+            sleep(1000);
+            alert("文件处理成功！");
+
+        }
+    })
+
+    //单步运行，当运行结束时进行弹窗并停止运行
+    function Next() {
+        cnt++;
+        if (cnt >= obj.length) {
+            alert("命令已经执行完毕!");
+            cnt = obj.length - 1;
+            return;
+        }
+        display();
+
+    }
+
+    //手动输入文件，并在HTML上显示相应的值
+    $("#output").on("change", function () {
+        halt = 0;
+        cnt = 0;
+        index = -1;
+        reader = new FileReader()
+        file = $(this).get(0).files[0]
+        reader.readAsText(file)
+        reader.onload = function () {
+            //转化为json文件
+            obj = JSON.parse(reader.result);
+            display();
+        }
+    })
+
+    function display() {
+        var text_MEM = "";
+        var text_REG = "";
+        var text_CC = "";
+        var x;
+        for (x in obj[cnt].REG) {
+            text_REG += x + ": " + obj[cnt].REG[x] + "\n";
+        }
+        for (x in obj[cnt].CC) {
+            text_CC += x + ": " + obj[cnt].CC[x] + "\n";
+        }
+        var cycle = cnt + 1;
+
+        for (var i = 0; i < raw.length; i++)
+            if (obj[cnt].PC == ins[i]) {
+                if (index === i - 1) { index = i; halt = 1; }
+                else index = i - 1;
+                console.log(index);
+                break;
+            }
+        $("#unhappy").get(0).innerText = "当前的PC指令为: " + raw[index] + "\n" + "执行回合数： " + cycle + "\n" + "PC:" + obj[cnt].PC + "\n" + "CC: " + "\n" + text_CC +
+            "\n" + "REG: " + "\n" + text_REG + "\n" + "STAT: " + obj[cnt].STAT + "\n";
+        if (obj[cnt].STAT == 2) setTimeout("alert('HALT!')", 0);
+        if (obj[cnt].STAT == 3) setTimeout("alert('ADR!')", 0);
+        if (obj[cnt].STAT == 4) setTimeout("alert('INS!')", 0);
+    }
+</script>
+
+</html>
